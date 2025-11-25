@@ -6,10 +6,7 @@ using UnityEngine;
 
 namespace FusionExamples.Tanknarok
 {
-	/// <summary>
-	/// Handle player input by responding to Fusion input polling, filling an input struct and then working with
-	/// that input struct in the Fusion Simulation loop.
-	/// </summary>
+	
 	public class InputController : NetworkBehaviour, INetworkRunnerCallbacks
 	{
 		[SerializeField] private LayerMask _mouseRayMask;

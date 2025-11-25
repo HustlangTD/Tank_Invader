@@ -88,11 +88,7 @@ namespace FusionExamples.Tanknarok
 			}
 		}
 
-		/// <summary>
-		/// Fire the current weapon. This is called from the Input Auth Client and on the Server in
-		/// response to player input. Input Auth Client spawns a dummy shot that gets replaced by the networked shot
-		/// whenever it arrives
-		/// </summary>
+		
 		public void FireWeapon(WeaponInstallationType weaponType)
 		{
 			if (!IsWeaponFireAllowed(weaponType))

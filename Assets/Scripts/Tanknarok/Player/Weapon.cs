@@ -5,10 +5,7 @@ using UnityEngine;
 
 namespace FusionExamples.Tanknarok
 {
-	/// <summary>
-	/// The Weapon class controls how fast a weapon fires, which projectiles it uses
-	/// and the start position and direction of projectiles.
-	/// </summary>
+	
 
 	public class Weapon : NetworkBehaviourWithState<Weapon.NetworkState>
 	{

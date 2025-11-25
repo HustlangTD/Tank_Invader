@@ -24,6 +24,10 @@ namespace FusionExamples.Tanknarok
 		[SerializeField] private float _respawnTime;
 		[SerializeField] private WeaponManager weaponManager;
 
+		[SerializeField] private PlayerNameUI _playerNameUI;
+
+        [Networked] public NetworkString<_16> NetName { get; set; }
+
 		public struct DamageEvent : INetworkEvent
 		{
 			public Vector3 impulse;
@@ -106,6 +110,14 @@ namespace FusionExamples.Tanknarok
 
 			_changes = GetChangeDetector(ChangeDetector.Source.SimulationState);
 
+			if (Object.HasStateAuthority)
+            {
+                NetName = App.LocalPlayerName;
+            }
+            
+            // Cập nhật hiển thị ngay khi spawn
+            _playerNameUI.SetName(NetName.ToString());
+
 			ready = false;
 
 			SetMaterial();
@@ -184,14 +196,7 @@ namespace FusionExamples.Tanknarok
 			}
 		}
 
-		/// <summary>
-		/// Render is the Fusion equivalent of Unity's Update() and unlike FixedUpdateNetwork which is very different from FixedUpdate,
-		/// Render is in fact exactly the same. It even uses the same Time.deltaTime time steps. The purpose of Render is that
-		/// it is always called *after* FixedUpdateNetwork - so to be safe you should use Render over Update if you're on a
-		/// SimulationBehaviour.
-		///
-		/// Here, we use Render to update visual aspects of the Tank that does not involve changing of networked properties.
-		/// </summary>
+		
 		public override void Render()
 		{
 			foreach (var change in _changes.DetectChanges(this))
@@ -201,6 +206,9 @@ namespace FusionExamples.Tanknarok
 					case nameof(stage):
 						OnStageChanged();
 						break;
+					case nameof(NetName):
+                        _playerNameUI.SetName(NetName.ToString());
+                        break;
 				}
 			}
 				
@@ -221,9 +229,7 @@ namespace FusionExamples.Tanknarok
 			}
 		}
 
-		/// <summary>
-		/// Set the direction of movement and aim
-		/// </summary>
+		
 		private void SetDirections(Vector2 moveVector, Vector2 aimVector)
 		{
 			if (!isActivated)

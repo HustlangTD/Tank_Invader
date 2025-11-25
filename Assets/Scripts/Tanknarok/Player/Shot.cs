@@ -6,15 +6,11 @@ namespace FusionExamples.Tanknarok
 {
 	public struct ShotState : ISparseState<Shot>
 	{
-		/// <summary>
-		/// Generic sparse state properties required by the interface
-		/// </summary>
+		
 		public int StartTick { get; set; }
 		public int EndTick { get; set; }
 
-		/// <summary>
-		/// Shot specific sparse properties
-		/// </summary>
+		
 		public Vector3 Position;
 		public Vector3 Direction;
 

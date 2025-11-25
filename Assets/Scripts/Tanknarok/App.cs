@@ -23,6 +23,10 @@ namespace FusionExamples.Tanknarok
 		[SerializeField] private GameObject _uiGame;
 		[SerializeField] private TMP_Dropdown _regionDropdown;
 		[SerializeField] private TextMeshProUGUI _audioText;
+		[SerializeField] private TMP_InputField _nameInput;
+
+		public static string LocalPlayerName = "Player";
+
 
 		private FusionLauncher.ConnectionStatus _status = FusionLauncher.ConnectionStatus.Disconnected;
 		private GameMode _gameMode;
@@ -90,6 +94,11 @@ namespace FusionExamples.Tanknarok
 		{
 			if (GateUI(_uiRoom))
 			{
+				if (_nameInput != null && !string.IsNullOrEmpty(_nameInput.text))
+                {
+                    LocalPlayerName = _nameInput.text;
+                }	
+
 				// Get region from dropdown
 				string region = string.Empty;
 				if (_regionDropdown.value > 0)
