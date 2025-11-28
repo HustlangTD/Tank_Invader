@@ -1,4 +1,3 @@
-using Fusion;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -7,13 +6,12 @@ using UnityEngine.UI;
 
 namespace FusionExamples.Tanknarok
 {
-    public class ChatManager : NetworkBehaviour
+    public class ChatManager : MonoBehaviour
     {
         [Header("UI References")]
         [SerializeField] private TMP_InputField _chatInput;
         [SerializeField] private TextMeshProUGUI _chatContent;
         [SerializeField] private ScrollRect _scrollRect;
-        [SerializeField] private GameObject _chatPanel; // Panel chứa toàn bộ chat UI để ẩn hiện nếu muốn
 
         [Header("Settings")]
         [SerializeField] private int _maxMessages = 20;
@@ -25,73 +23,70 @@ namespace FusionExamples.Tanknarok
 
         private void Awake()
         {
-            // Singleton pattern đơn giản để dễ gọi từ nơi khác
             if (Instance != null && Instance != this)
             {
-                // Nếu đã có 1 cái (từ Lobby lần trước còn lưu lại), thì hủy cái mới này đi
                 Destroy(gameObject);
                 return;
             }
-
-            // Nếu chưa có, gán cái này là Instance duy nhất
             Instance = this;
-
-            // Giữ cho khung chat này sống sót khi chuyển sang Level 1, Level 2
             DontDestroyOnLoad(gameObject);
         }
 
         private void Start()
         {
-            // Ẩn input field lúc đầu
-            _chatInput.gameObject.SetActive(false);
-            
-            // Lắng nghe sự kiện khi người dùng submit tin nhắn (ấn Enter khi đang gõ)
-            _chatInput.onSubmit.AddListener(OnSubmitMessage);
+            // Ẩn khung nhập lúc đầu
+            if (_chatInput != null)
+                _chatInput.gameObject.SetActive(false);
+
+            if (_chatInput != null)
+                _chatInput.onSubmit.AddListener(OnSubmitMessage);
         }
 
         private void Update()
         {
-            // Xử lý phím Enter để bật/tắt chat
+            // Bấm Enter để bật/tắt khung chat
             if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
             {
                 if (_isTyping)
                 {
-                    // Nếu đang gõ mà ấn Enter -> Gửi tin nhắn (đã xử lý ở OnSubmitMessage) hoặc đóng nếu rỗng
+                    // Nếu đang gõ mà bấm Enter (và ô trống) thì đóng lại
                     if (string.IsNullOrWhiteSpace(_chatInput.text))
                     {
                         ToggleChat(false);
                     }
+                    // Nếu có chữ thì OnSubmitMessage sẽ được gọi tự động bởi InputField
                 }
                 else
                 {
-                    // Nếu chưa gõ -> Mở khung chat
+                    // Mở khung chat
                     ToggleChat(true);
                 }
             }
         }
 
+        // Hàm bị thiếu đây ạ
         private void ToggleChat(bool status)
         {
             _isTyping = status;
-            _chatInput.gameObject.SetActive(status);
+            
+            if (_chatInput != null)
+                _chatInput.gameObject.SetActive(status);
 
             if (status)
             {
-                _chatInput.ActivateInputField(); // Focus vào ô nhập
-                Cursor.lockState = CursorLockMode.None; // Mở khóa chuột
-                Cursor.visible = true;
+                _chatInput.ActivateInputField();
                 
-                // Tạm thời vô hiệu hóa input điều khiển xe tăng (nếu cần)
-                InputController.fetchInput = false; 
+                // Hiện con trỏ chuột để chat
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+
+                // Tắt điều khiển xe tăng khi đang chat
+                InputController.fetchInput = false;
             }
             else
             {
-                _chatInput.text = ""; // Xóa text cũ
+                _chatInput.text = ""; // Xóa chữ vừa nhập
                 _chatInput.DeactivateInputField();
-                
-                // Khóa chuột lại để chơi game (tùy logic game của bạn)
-                // Cursor.lockState = CursorLockMode.Locked; 
-                // Cursor.visible = false;
 
                 // Bật lại điều khiển xe tăng
                 InputController.fetchInput = true;
@@ -102,24 +97,30 @@ namespace FusionExamples.Tanknarok
         {
             if (!string.IsNullOrWhiteSpace(message))
             {
-                // Lấy tên người chơi hiện tại từ App.cs (biến static bạn đã làm ở bước trước)
                 string senderName = App.LocalPlayerName;
-
-                // Gửi RPC đến tất cả mọi người (RpcTargets.All)
-                RPC_SendMessage(senderName, message);
+                SendChatViaPlayer(senderName, message);
             }
-
-            // Gửi xong thì đóng khung input
+            // Gửi xong thì đóng khung nhập lại
             ToggleChat(false);
         }
 
-        // [Rpc] đánh dấu đây là hàm gửi qua mạng
-        // RpcSources.All: Ai cũng có thể gọi
-        // RpcTargets.All: Gửi tới tất cả mọi người
-        [Rpc(RpcSources.All, RpcTargets.All)]
-        public void RPC_SendMessage(string name, string message)
+        private void SendChatViaPlayer(string name, string message)
         {
-            // Format tin nhắn: [Tên]: Nội dung
+            // Tìm Player của chính mình để nhờ gửi RPC
+            var players = FindObjectsByType<Player>(FindObjectsSortMode.None);
+            foreach (var p in players)
+            {
+                // HasInputAuthority nghĩa là Player do máy này điều khiển
+                if (p.Object != null && p.Object.HasInputAuthority)
+                {
+                    p.RPC_SendChatMessage(name, message);
+                    break;
+                }
+            }
+        }
+
+        public void DisplayMessage(string name, string message)
+        {
             string formattedMsg = $"<b><color=#FFD700>{name}</color></b>: {message}";
             AddMessageToChat(formattedMsg);
         }
@@ -127,17 +128,11 @@ namespace FusionExamples.Tanknarok
         private void AddMessageToChat(string msg)
         {
             _messages.Add(msg);
-
-            // Giới hạn số lượng tin nhắn để tránh đầy bộ nhớ
             if (_messages.Count > _maxMessages)
             {
                 _messages.RemoveAt(0);
             }
-
-            // Cập nhật UI Text
             _chatContent.text = string.Join("\n", _messages);
-
-            // Tự động cuộn xuống dưới cùng
             StartCoroutine(ScrollToBottom());
         }
 
@@ -147,7 +142,6 @@ namespace FusionExamples.Tanknarok
             _scrollRect.verticalNormalizedPosition = 0f;
         }
 
-        // [THÊM]: Hàm này dùng để xóa Chat khi quay về Main Menu (nếu cần)
         public void ResetChat()
         {
             Destroy(gameObject);
