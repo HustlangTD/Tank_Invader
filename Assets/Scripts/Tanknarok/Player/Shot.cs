@@ -6,14 +6,14 @@ namespace FusionExamples.Tanknarok
 {
 	public struct ShotState : ISparseState<Shot>
 	{
-		
+		// Tick Data
 		public int StartTick { get; set; }
 		public int EndTick { get; set; }
 
-		
+		// State Data
 		public Vector3 Position;
 		public Vector3 Direction;
-
+	//-- Constructors --//
 		public ShotState(Vector3 startPosition, Vector3 direction)
 		{
 			StartTick = 0;
@@ -21,13 +21,13 @@ namespace FusionExamples.Tanknarok
 			Position = startPosition;
 			Direction = direction;
 		}
-
+		//-- Public Methods --//
 		public void Extrapolate(float t, Shot prefab)
 		{
 			Position = GetPositionAt(t, prefab);
 			Direction = GetDirectionAt(t, prefab);
 		}
-
+//-- Getters --//
 		public Vector3 GetTargetPosition(Shot prefab)
 		{
 			float a = 0.5f * prefab.Gravity.y;
@@ -39,7 +39,7 @@ namespace FusionExamples.Tanknarok
 			p.y = 0.05f; // Return the position with a slight y offset to avoid placing target where it will end up z-fighting with the ground;
 			return p;
 		}
-
+		//-- Private Methods --//
 		private Vector3 GetPositionAt(float t, Shot prefab) => Position + t * (prefab.Speed * Direction + 0.5f * t * prefab.Gravity);
 		private Vector3 GetDirectionAt(float t, Shot prefab) => prefab.Speed==0 ? Direction : (prefab.Speed * Direction + t * prefab.Gravity).normalized;
 	}

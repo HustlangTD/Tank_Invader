@@ -9,7 +9,7 @@ public class MobileInput : MonoBehaviour
 	[SerializeField] private RectTransform _rightJoy;
 	[SerializeField] private RectTransform _rightKnob;
 	private Transform _canvas;
-
+	//-- Unity Methods --//
 	private void Awake()
 	{
 		_canvas = GetComponentInParent<Canvas>().transform;
@@ -23,7 +23,7 @@ public class MobileInput : MonoBehaviour
 				ic.ToggleReady();
 		}
 	}
-
+	///-- Public Methods --//
 	public void OnDisconnect()
 	{
 		NetworkRunner runner = FindObjectOfType<NetworkRunner>();
@@ -33,7 +33,7 @@ public class MobileInput : MonoBehaviour
 			runner.Shutdown(false);
 		}
 	}
-
+	//-- Private Methods --//
 	private void SetJoy(RectTransform joy, RectTransform knob, bool active, Vector2 center, Vector2 current)
 	{
 		center /= _canvas.localScale.x;
@@ -48,7 +48,7 @@ public class MobileInput : MonoBehaviour
 		
 		knob.anchoredPosition = current;
 	}
-
+	//-- Public Methods --//
 	public void SetLeft(bool active, Vector2 down, Vector2 current)
 	{
 		SetJoy(_leftJoy, _leftKnob, active, down, current);

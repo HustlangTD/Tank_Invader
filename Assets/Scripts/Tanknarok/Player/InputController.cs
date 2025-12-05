@@ -12,7 +12,7 @@ namespace FusionExamples.Tanknarok
 		[SerializeField] private LayerMask _mouseRayMask;
 
 		public static bool fetchInput = true;
-
+//-- Private Fields --//
 		private Player _player;
 		private NetworkInputData _inputData = new NetworkInputData();
 		private Vector2 _moveDelta;
@@ -23,9 +23,9 @@ namespace FusionExamples.Tanknarok
 		private Vector2 _rightDown;
 		private bool _leftTouchWasDown;
 		private bool _rightTouchWasDown;
-
+//-- Cached Components --//
 		private MobileInput _mobileInput;
-
+//-- Button State --//
 		private uint _buttonReset;
 		private uint _buttonSample;
 
