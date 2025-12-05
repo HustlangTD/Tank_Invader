@@ -387,7 +387,18 @@ namespace FusionExamples.Tanknarok
 			if (Object.HasStateAuthority)
 				stage = Stage.TeleportOut;
 		}
+		// [THÊM MỚI]: Hàm RPC để gửi chat
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+        public void RPC_SendChatMessage(string name, string message)
+        {
+            // Khi nhận được tin nhắn từ Server, báo cho ChatManager hiển thị lên
+            if (ChatManager.Instance != null)
+            {
+                ChatManager.Instance.DisplayMessage(name, message);
+            }
+        }
 	}
+	
 
 	
 }
